@@ -1,5 +1,7 @@
 # AppleSkin (Horizon WebAssembly mod)
 
+**forked by Jorungandr**
+
 Shows the saturation that vanilla keeps hidden behind the hunger bar, and what a food item
 will actually restore. Runs sandboxed as `mod.wasm` — no compiler or native-code trust prompt
 needed on the player's machine.
