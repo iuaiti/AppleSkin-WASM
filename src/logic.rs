@@ -167,11 +167,11 @@ pub fn parse_food(tag: &Tag) -> Option<FoodValue> {
 pub fn tooltip_lines(value: FoodValue) -> Vec<(String, u32)> {
     let mut lines = Vec::new();
     if value.nutrition != 0 {
-        lines.push((format!("恢复饥饿 +{}", value.nutrition), 0x55FF55));
+        lines.push((format!("Food restored +{}", value.nutrition), 0x55FF55));
     }
     let gain = value.saturation_gain();
     if gain > 0.0 {
-        lines.push((format!("饱和度 +{gain:.1}"), 0xFFD9A21B));
+        lines.push((format!("Saturation +{gain:.1}"), 0xFFD9A21B));
     }
     lines
 }
@@ -222,8 +222,8 @@ mod tests {
         assert!((value.saturation_gain() - 12.8).abs() < 0.001);
         let lines = tooltip_lines(value);
         assert_eq!(lines.len(), 2);
-        assert_eq!(lines[0].0, "恢复饥饿 +8");
-        assert_eq!(lines[1].0, "饱和度 +12.8");
+        assert_eq!(lines[0].0, "Food restored +8");
+        assert_eq!(lines[1].0, "Saturation +12.8");
     }
 
     #[test]
