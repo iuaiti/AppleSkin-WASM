@@ -16,10 +16,10 @@ use logic::{
 use mod_api::{
     ClientHost, ClientTickPostEvent, ComponentId, DebugEntry, DebugEntryLinesEvent, DebugGroup,
     DrawContext, EffectCategory, Flow, GuiDraw, GuiLayerPostEvent, GuiLayerPreEvent, Hand, Hooks,
-    Identifier, ItemKey, ItemResource, ItemStack, PoseOp, RegisterDebugEntriesEvent, Registrar,
+    Identifier, ItemKey, ItemResource, ItemStack, RegisterDebugEntriesEvent, Registrar,
     RegistrationContext, RenderTooltipGatherComponentsEvent, RenderTooltipPreEvent,
     ScreenRenderPostEvent, SettingSpec, Text, TooltipDisplay, TooltipElement, TooltipImage,
-    TooltipImageSource,
+    TooltipImageSource, client::hud_layout::PoseOp,
 };
 
 const DEBUG_FOOD_STATS_ID: &str = "appleskin_hzn:food_stats";
@@ -61,7 +61,7 @@ fn lock_state(mutex: &Mutex<ModState>) -> std::sync::MutexGuard<'_, ModState> {
 
 fn marker_item_key(host: &dyn ClientHost, state: &mut ModState) -> Option<ItemKey> {
     if state.marker_item.is_none()
-        && let Some(id) = Identifier::parse(TOOLTIP_MARKER_ITEM)
+        && let Ok(id) = Identifier::parse(TOOLTIP_MARKER_ITEM)
     {
         state.marker_item = host.item_key(&id);
     }
@@ -110,7 +110,7 @@ fn inspect_food(host: &dyn ClientHost, stack: &ItemStack) -> Option<InspectedFoo
     let food = parse_food(&food_tag)?;
 
     let consumable_tag = resource.value(host, &consumable_id);
-    let is_consumable = consumable_tag.is_some() || resource.use_duration(host) > 0;
+    let is_consumable = consumable_tag.is_some() || resource.use_duration(host).unwrap_or(0) > 0;
     if !is_consumable {
         return None;
     }
@@ -122,39 +122,27 @@ fn inspect_food(host: &dyn ClientHost, stack: &ItemStack) -> Option<InspectedFoo
 
     // Fallback when a built-in food item exposes use_duration without inline consumable NBT.
     if consumable_tag.is_none() {
-        let item_id = host.item_key_id(stack.item());
-        match item_id.as_str() {
-            "minecraft:rotten_flesh" => effects.push(ConsumeEffectInfo {
-                id: "minecraft:hunger".to_owned(),
-                duration: 600,
-                amplifier: 0,
-            }),
-            "minecraft:spider_eye" => effects.push(ConsumeEffectInfo {
-                id: "minecraft:poison".to_owned(),
-                duration: 100,
-                amplifier: 0,
-            }),
-            "minecraft:poisonous_potato" => effects.push(ConsumeEffectInfo {
-                id: "minecraft:poison".to_owned(),
-                duration: 100,
-                amplifier: 0,
-            }),
-            "minecraft:pufferfish" => effects.push(ConsumeEffectInfo {
-                id: "minecraft:poison".to_owned(),
-                duration: 1200,
-                amplifier: 1,
-            }),
-            "minecraft:golden_apple" => effects.push(ConsumeEffectInfo {
-                id: "minecraft:regeneration".to_owned(),
-                duration: 100,
-                amplifier: 1,
-            }),
-            "minecraft:enchanted_golden_apple" => effects.push(ConsumeEffectInfo {
-                id: "minecraft:regeneration".to_owned(),
-                duration: 400,
-                amplifier: 1,
-            }),
-            _ => {}
+        const BUILTIN_EFFECTS: &[(&str, &str, i32, i32)] = &[
+            ("minecraft:rotten_flesh", "minecraft:hunger", 600, 0),
+            ("minecraft:spider_eye", "minecraft:poison", 100, 0),
+            ("minecraft:poisonous_potato", "minecraft:poison", 100, 0),
+            ("minecraft:pufferfish", "minecraft:poison", 1200, 1),
+            ("minecraft:golden_apple", "minecraft:regeneration", 100, 1),
+            ("minecraft:enchanted_golden_apple", "minecraft:regeneration", 400, 1),
+        ];
+        for &(item_id, eff_id, duration, amplifier) in BUILTIN_EFFECTS {
+            if Identifier::parse(item_id)
+                .ok()
+                .and_then(|ident| host.item_key(&ident))
+                == Some(stack.item())
+            {
+                effects.push(ConsumeEffectInfo {
+                    id: eff_id.to_owned(),
+                    duration,
+                    amplifier,
+                });
+                break;
+            }
         }
     }
 
@@ -564,7 +552,9 @@ impl Hooks for Mod {
         let Some(food) = player.food(host) else {
             return;
         };
-        let living = player.living();
+        let Some(living) = host.living(player.entity()) else {
+            return;
+        };
         let health = living.health(host).unwrap_or(20.0);
         let max_health = living.max_health(host).unwrap_or(20.0);
         let absorption = living.absorption(host).unwrap_or(0.0);
