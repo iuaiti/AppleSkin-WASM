@@ -4,7 +4,6 @@
 use mod_api::Tag;
 
 pub const ICON: f32 = 9.0;
-pub const STEP: f32 = 8.0;
 pub const BAR_RIGHT: f32 = 91.0;
 pub const BAR_LEFT: f32 = 91.0;
 pub const BAR_BOTTOM: f32 = 39.0;
@@ -220,13 +219,6 @@ pub struct FoodValue {
     pub saturation: f32,
     /// Whether the food can be eaten at full hunger (`can_always_eat`).
     pub can_always_eat: bool,
-}
-
-impl FoodValue {
-    /// Returns the direct saturation gain of this food component.
-    pub fn saturation_gain(&self) -> f32 {
-        self.saturation
-    }
 }
 
 fn unwrap_mixed(mut tag: &Tag) -> &Tag {
@@ -763,14 +755,6 @@ pub fn horizon_tooltip_position(
 /// Formats F3 Debug Screen line matching `DebugInfoHudEntry.java` (`"hunger: 20, sat: 5.00, exh: 0.00/4"`).
 pub fn format_debug_food_line(food_level: i32, saturation: f32, exhaustion: f32) -> String {
     format!("hunger: {food_level}, sat: {saturation:.2}, exh: {exhaustion:.2}/4")
-}
-
-/// Left edge and top edge of hunger icon `index` (zero being the rightmost) without animation.
-pub fn icon_origin(width: f32, height: f32, index: usize) -> [f32; 2] {
-    [
-        width / 2.0 + BAR_RIGHT - ICON - STEP * index as f32,
-        height - BAR_BOTTOM,
-    ]
 }
 
 #[cfg(test)]

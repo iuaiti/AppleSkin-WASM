@@ -513,11 +513,11 @@ impl Hooks for Mod {
         if event.layer != "minecraft:player_health" {
             return;
         }
-        let (riding_mount, gui_ticks, mut flash_alpha) = {
+        let (riding_mount, gui_ticks) = {
             let mut state = lock_state(&self.state);
             let riding = state.riding_mount;
             state.riding_mount = false;
-            (riding, state.gui_ticks, state.flash.alpha)
+            (riding, state.gui_ticks)
         };
         if host.is_paused() {
             return;
@@ -613,7 +613,7 @@ impl Hooks for Mod {
             lock_state(&self.state).flash.reset();
             return;
         };
-        flash_alpha = lock_state(&self.state).flash.alpha;
+        let flash_alpha = lock_state(&self.state).flash.alpha;
 
         if !riding_mount && show_food_values {
             let empty_sprite = food_sprite_name(inspected.is_rotten, FoodSpriteKind::Empty);
