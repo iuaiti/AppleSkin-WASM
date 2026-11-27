@@ -1,54 +1,21 @@
-# AppleSkin (Horizon WebAssembly mod)
+# AppleSkin (Horizon WASM)
 
-**forked by Jorungandr**
+A client-side WebAssembly port of [AppleSkin](https://github.com/squeek502/AppleSkin) for the **Horizon** Minecraft 26.3 client (`api = "0.2"`).
 
-Shows the saturation that vanilla keeps hidden behind the hunger bar, and what a food item
-will actually restore. Runs sandboxed as `mod.wasm` — no compiler or native-code trust prompt
-needed on the player's machine.
+## Features (1.1.0)
 
-- **Saturation on the hunger bar.** Each point of saturation covers half of one hunger icon,
-  drawn in gold along the top edge of the bar, right to left, the way the hunger icons fill.
-- **Food values in tooltips.** A food item lists hunger and saturation gain, read from the
-  item's own `minecraft:food` component, so modded food works too.
-- Settings are under **Options > Mods > AppleSkin**: the mod on or off, the saturation overlay,
-  and the tooltip lines.
+- **Saturation HUD overlay**: Renders golden-brown saturation icons over the hunger bar using AppleSkin's original sprites.
+- **Exhaustion HUD underlay**: Shows your exhaustion progress (`0..4`) behind the hunger bar.
+- **Held food preview**: Flashes restored hunger drumsticks, gained saturation, and estimated restored health hearts (natural regeneration + consume `minecraft:regeneration` effect) while holding food in your main hand or off-hand, matching vanilla icon jitter animations and hiding food overlays when riding a mount.
+- **Graphical food tooltips**: Displays restored hunger drumsticks, modified outline states, `"xN"` overflow labels, and saturation icons in food item tooltips (respecting Shift-key vs Always settings and harmful/rotten effects).
+- **F3 Debug Screen entry**: Registers `appleskin_hzn:food_stats` showing `hunger: <level>, sat: <sat>, exh: <exh>/4`.
+- **Mod settings & translations**: Registers all original AppleSkin toggles and flash-alpha slider with 22 language files.
 
-## Build (WebAssembly)
+## Building
 
-Requires Rust (`rustup`, Rust 1.95+) and `cargo-horizon-mod`:
-
-```bash
-cargo install --locked --git https://github.com/horizon-rust/horizon cargo-horizon-mod
-```
-
-(Optional) Move the SDK pin in `Cargo.toml` (`[package.metadata.horizon] sdk`) to the latest
-Horizon Nightly:
-
-```bash
-cargo horizon-mod update
-```
-
-Build `mod.wasm` and package `target/horizon-mod/appleskin_hzn.hmod`:
+CI automatically builds and checks `appleskin_hzn.hmod` via GitHub Actions (`.github/workflows/build-wasm.yml`):
 
 ```bash
 cargo horizon-mod build --wasm
+cargo horizon-mod check target/horizon-mod/appleskin_hzn.hmod
 ```
-
-On the first build, `cargo horizon-mod` automatically installs the pinned Rust toolchain
-(with `rust-src`) via `rustup`, writes `mod.wasm` beside `horizon-mod.toml`, populates the
-`[wasm]` table in `horizon-mod.toml`, and packs `target/horizon-mod/appleskin_hzn.hmod`.
-Do not edit the `[wasm]` section by hand.
-
-## Install
-
-1. Copy `target/horizon-mod/appleskin_hzn.hmod` into your game folder's `horizon-mods/`
-   directory (in the launcher: **Open folder** on your instance).
-2. Enable the mod by adding `mod.appleskin_hzn:true` to `horizon-mods.txt` (beside
-   `options.txt`).
-3. Launch Horizon. If the mod is refused (layout mismatch or missing dependency), the
-   **Mods** screen shows the reason in red.
-
-## Licence
-
-MIT. It follows the original [AppleSkin](https://github.com/squeek502/AppleSkin) by squeek502
-(The Unlicense) without copying its code or artwork; see `NOTICE.md`.

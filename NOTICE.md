@@ -1,14 +1,12 @@
-# Notices
+This Horizon WASM port is based on the original AppleSkin mod by squeek502.
+- Original project: https://github.com/squeek502/AppleSkin
+- Original license: Unlicense (public domain)
 
-AppleSkin is an independent WebAssembly mod for Horizon, written for this project (MIT, see `LICENSE`).
+Included original assets under `assets/appleskin_hzn/` and `icon.png`:
+- `textures/gui/icons.png` (saturation, exhaustion, and tooltip saturation sprites)
+- `textures/gui/sprites/tooltip_hunger_outline.png`
+- `lang/*.json` (original AppleSkin translations for mod settings)
+- `icon.png` (AppleSkin mod icon)
 
-- Author: Jorungandr
-- Original mod it follows: **AppleSkin** by squeek502 and contributors,
-  <https://github.com/squeek502/AppleSkin>, released under **The Unlicense** (public domain).
-  Its licence asks for nothing, and no code or artwork from it is copied here: the hunger and
-  saturation layout, the highlight and the tooltip lines are written from the feature description.
-- The earlier `.hnmod` Horizon port by soufied (`AppleSkin-Horizon`) was read for hook usage only;
-  no source from it is included, and its own MIT terms are unaffected.
-
-Not affiliated with or endorsed by Mojang, Microsoft, squeek502, or the Horizon team.
-Minecraft assets are not included: players bring their own copy of the game.
+All original HUD, tooltip, food helper, exhaustion, and debug screen logic is adapted
+for the Horizon mod API (`api = "0.2"`).
