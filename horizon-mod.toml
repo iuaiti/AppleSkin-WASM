@@ -1,8 +1,8 @@
 id = "appleskin_hzn"
 name = "AppleSkin (Horizon)"
-version = "1.1.0"
+version = "1.1.1"
 description = "Shows the saturation hidden behind your hunger bar, and what a food item will restore."
-authors = ["Jorungandr"]
+authors = ["Iuaititi"]
 license = "MIT"
 api = "0.2"
 side = "client"

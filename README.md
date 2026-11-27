@@ -2,7 +2,7 @@
 
 A client-side WebAssembly port of [AppleSkin](https://github.com/squeek502/AppleSkin) for the **Horizon** Minecraft 26.3 client (`api = "0.2"`).
 
-## Features (1.1.0)
+## Features (1.1.1)
 
 - **Saturation HUD overlay**: Renders golden-brown saturation icons over the hunger bar using AppleSkin's original sprites.
 - **Exhaustion HUD underlay**: Shows your exhaustion progress (`0..4`) behind the hunger bar.
