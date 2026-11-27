@@ -6,10 +6,10 @@ mod logic;
 use std::sync::Mutex;
 
 use logic::{
-    BAR_BOTTOM, BAR_LEFT, BAR_RIGHT, ConsumeEffectInfo, FlashState, FoodOutline, FoodValue, ICON,
-    PALETTE, SATURATION, TooltipFoodOverlay, capped_saturation_gained, cell_color,
-    compute_hud_offsets, estimated_health_increment, exhaustion_width, format_debug_food_line,
-    health_overlay_icons, horizon_tooltip_layout, horizon_tooltip_position, hunger_overlay_icons,
+    ConsumeEffectInfo, FlashState, FoodOutline, FoodValue, ICON, PALETTE, SATURATION,
+    TooltipFoodOverlay, capped_saturation_gained, cell_color, compute_hud_offsets,
+    estimated_health_increment, exhaustion_width, format_debug_food_line, health_overlay_icons,
+    horizon_tooltip_layout, horizon_tooltip_position, hud_bar_anchors, hunger_overlay_icons,
     parse_consumable_effects, parse_food, saturation_overlay_icons, tooltip_saturation_u,
     with_alpha,
 };
@@ -200,7 +200,7 @@ fn draw_exhaustion_underlay(draw: &mut dyn DrawContext, right: f32, top: f32, ex
         let pixel = with_alpha(PALETTE[9], 0.75);
         for row in 0..9 {
             for col in (81 - w)..81 {
-                if (row + col) % 2 == 0 {
+                if (row + col) % 2 == 1 {
                     draw.fill([(right - 81.0) + col as f32, top + row as f32, 1.0, 1.0], pixel);
                 }
             }
@@ -500,8 +500,7 @@ impl Hooks for Mod {
                     return Flow::Continue;
                 };
                 let [width, height] = event.draw.size();
-                let right = width / 2.0 + BAR_RIGHT;
-                let top = height - BAR_BOTTOM;
+                let (_left, right, top) = hud_bar_anchors(width, height);
                 draw_exhaustion_underlay(event.draw, right, top, food.exhaustion);
             }
             _ => {}
@@ -581,9 +580,7 @@ impl Hooks for Mod {
         );
 
         let [width, height] = event.draw.size();
-        let right = width / 2.0 + BAR_RIGHT;
-        let left = width / 2.0 - BAR_LEFT;
-        let top = height - BAR_BOTTOM;
+        let (left, right, top) = hud_bar_anchors(width, height);
 
         if !riding_mount && show_saturation {
             draw_saturation_icons(
@@ -614,6 +611,9 @@ impl Hooks for Mod {
             return;
         };
         let flash_alpha = lock_state(&self.state).flash.alpha;
+        if flash_alpha <= 0.0 {
+            return;
+        }
 
         if !riding_mount && show_food_values {
             let empty_sprite = food_sprite_name(inspected.is_rotten, FoodSpriteKind::Empty);

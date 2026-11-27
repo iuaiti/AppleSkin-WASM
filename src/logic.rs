@@ -11,6 +11,15 @@ pub const BAR_BOTTOM: f32 = 39.0;
 pub const MAX_EXHAUSTION: f32 = 4.0;
 pub const REGEN_EXHAUSTION_INCREMENT: f32 = 6.0;
 
+/// Computes integer-aligned `(left, right, top)` anchors for the vanilla HUD
+/// health and hunger bars, matching Minecraft/Horizon's integer `gui_width / 2`
+/// division so overlays stay aligned on odd scaled widths (e.g. 1366x768 fullscreen).
+pub fn hud_bar_anchors(width: f32, height: f32) -> (f32, f32, f32) {
+    let center = (width.max(0.0) / 2.0).floor();
+    let top = height.floor() - BAR_BOTTOM;
+    (center - BAR_LEFT, center + BAR_RIGHT, top)
+}
+
 /// Four HUD saturation icon frames from a sliver to a full drumstick (9x9 each).
 /// Used when falling back to pixel fills if the atlas sprite is unavailable.
 pub const SATURATION: [&[&str]; 4] = [
@@ -913,5 +922,13 @@ mod tests {
             format_debug_food_line(20, 5.0, 0.25),
             "hunger: 20, sat: 5.00, exh: 0.25/4"
         );
+    }
+
+    #[test]
+    fn hud_bar_anchors_snaps_center_for_odd_fullscreen_widths() {
+        assert_eq!(hud_bar_anchors(683.0, 384.0), (250.0, 432.0, 345.0));
+        assert_eq!(hud_bar_anchors(640.0, 360.0), (229.0, 411.0, 321.0));
+        assert_eq!(hud_bar_anchors(455.3333, 256.0), (136.0, 318.0, 217.0));
+        assert_eq!(hud_bar_anchors(853.0, 480.0), (335.0, 517.0, 441.0));
     }
 }
